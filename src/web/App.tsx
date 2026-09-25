@@ -3,11 +3,13 @@ import { analyzeStructure } from "../analysis/structural";
 import { resolveWorkflowGraph } from "../graph/resolve";
 import { parseWorkflowBytes } from "../input/parse-workflow";
 import type {
+  PreflightReport,
   ResolvedGraph,
   StructuralAnalysis,
   ValidationIssue,
   WorkflowConfig,
 } from "../shared/contracts";
+import { PreflightReportView } from "./PreflightReportView";
 import { WorkflowGraph } from "./WorkflowGraph";
 
 type ViewState =
@@ -19,6 +21,9 @@ type ViewState =
       workflow: WorkflowConfig;
       graph: ResolvedGraph;
       structural: StructuralAnalysis;
+      report?: PreflightReport;
+      scanPhase?: string;
+      scanError?: string;
     };
 
 export function App() {
@@ -49,6 +54,49 @@ export function App() {
     } finally {
       setBusy(false);
       event.target.value = "";
+    }
+  }
+
+  async function runServPreflight() {
+    if (state.kind !== "success") return;
+    setState({
+      ...state,
+      scanPhase: "Preparing safe workflow projection…",
+      scanError: undefined,
+    });
+    await Promise.resolve();
+    setState((current) =>
+      current.kind === "success"
+        ? { ...current, scanPhase: "Running SERV semantic review…" }
+        : current,
+    );
+    try {
+      const response = await fetch("/api/preflight", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workflow: state.workflow }),
+      });
+      const payload: unknown = await response.json();
+      if (!response.ok || !isPreflightReport(payload))
+        throw new Error(readSafeApiMessage(payload));
+      setState((current) =>
+        current.kind === "success"
+          ? { ...current, report: payload, scanPhase: undefined }
+          : current,
+      );
+    } catch (error) {
+      setState((current) =>
+        current.kind === "success"
+          ? {
+              ...current,
+              scanPhase: undefined,
+              scanError:
+                error instanceof Error
+                  ? error.message
+                  : "SERV semantic review could not be completed.",
+            }
+          : current,
+      );
     }
   }
 
@@ -103,6 +151,10 @@ export function App() {
             workflow={state.workflow}
             graph={state.graph}
             structural={state.structural}
+            report={state.report}
+            scanPhase={state.scanPhase}
+            scanError={state.scanError}
+            onRun={() => void runServPreflight()}
           />
         )}
       </section>
@@ -157,11 +209,19 @@ function SuccessState({
   workflow,
   graph,
   structural,
+  report,
+  scanPhase,
+  scanError,
+  onRun,
 }: {
   fileName: string;
   workflow: WorkflowConfig;
   graph: ResolvedGraph;
   structural: StructuralAnalysis;
+  report?: PreflightReport;
+  scanPhase?: string;
+  scanError?: string;
+  onRun: () => void;
 }) {
   return (
     <div className="result-panel">
@@ -225,12 +285,40 @@ function SuccessState({
           <h3>SERV semantic review</h3>
           <p>A full preflight is never complete from graph validation alone.</p>
         </div>
-        <button type="button" disabled>
-          Run SERV Preflight
+        <button type="button" disabled={Boolean(scanPhase)} onClick={onRun}>
+          {scanPhase ?? (report ? "Rescan with SERV" : "Run SERV Preflight")}
         </button>
       </section>
+      {scanError && (
+        <div className="scan-error" role="alert">
+          <strong>SERV REVIEW INCOMPLETE</strong>
+          <p>{scanError}</p>
+          <p>Structural analysis only - SERV semantic review unavailable.</p>
+        </div>
+      )}
+      {report && <PreflightReportView report={report} />}
     </div>
   );
+}
+
+function isPreflightReport(value: unknown): value is PreflightReport {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "schemaVersion" in value &&
+    "statusLabel" in value
+  );
+}
+
+function readSafeApiMessage(value: unknown): string {
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "message" in value &&
+    typeof value.message === "string"
+  )
+    return value.message;
+  return "SERV semantic review could not be completed. Structural findings are preserved.";
 }
 
 function Metric({ label, value }: { label: string; value: string | number }) {

@@ -199,6 +199,37 @@ export interface SemanticProjection {
   }>;
 }
 
+export interface PreflightReport {
+  schemaVersion: "1";
+  scanId: string;
+  generatedAt: string;
+  workflow: { name: string; goal: string };
+  graph: ResolvedGraph;
+  status: CombinedPreflightStatus;
+  statusLabel:
+    | "READY FOR REVIEW"
+    | "WARNINGS FOUND"
+    | "BLOCKED"
+    | "SERV REVIEW INCOMPLETE";
+  structural: StructuralAnalysis;
+  semantic: {
+    completed: boolean;
+    summary: string;
+    findings: PreflightFinding[];
+    model: string;
+    reasoningEffort: "low";
+    latencyMs?: number;
+    usage?: {
+      promptTokens: number;
+      completionTokens: number;
+      totalTokens: number;
+    };
+  };
+  findings: PreflightFinding[];
+  readOnlyDeclaration: string;
+  limitations: string[];
+}
+
 export type ParseResult =
   | { ok: true; workflow: WorkflowConfig }
   | { ok: false; issues: ValidationIssue[] };
