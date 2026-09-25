@@ -1,0 +1,19 @@
+{
+  "name": "Refund review with missing handoff",
+  "goal": "Review a refund request and prepare a customer response.",
+  "triggers": [{ "type": "manual", "name": "Start refund review" }],
+  "tasks": [
+    {
+      "name": "Intake",
+      "agentId": 101,
+      "description": "Produce a normalized refund case."
+    },
+    {
+      "name": "Review",
+      "agentId": 202,
+      "description": "Evaluate the refund case.",
+      "dependencies": ["Intake"]
+    }
+  ],
+  "edges": [{ "from": "trigger:Start refund review", "to": "task:Intake" }]
+}

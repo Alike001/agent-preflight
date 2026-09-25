@@ -1,0 +1,34 @@
+{
+  "name": "Structurally valid incompatible handoff",
+  "goal": "Turn researched competitor findings into a validated contract execution plan.",
+  "triggers": [{ "type": "manual", "name": "Start" }],
+  "tasks": [
+    {
+      "name": "Research competitors",
+      "agentId": 101,
+      "description": "Research competitor positioning and produce a prose market brief.",
+      "outputOptions": {
+        "brief": {
+          "name": "Market brief",
+          "type": "text",
+          "instructions": "Return sourced competitor findings in prose."
+        }
+      }
+    },
+    {
+      "name": "Prepare contract call",
+      "agentId": 202,
+      "description": "Build a transaction call from a validated Solidity ABI and network deployment address.",
+      "input": "Validated Solidity ABI, contract address, function name, and typed parameters.",
+      "dependencies": ["Research competitors"]
+    }
+  ],
+  "edges": [
+    { "from": "trigger:Start", "to": "task:Research competitors" },
+    {
+      "from": "task:Research competitors",
+      "sourcePort": "brief",
+      "to": "task:Prepare contract call"
+    }
+  ]
+}

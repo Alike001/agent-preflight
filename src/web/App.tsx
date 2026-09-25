@@ -1,8 +1,10 @@
 import { useRef, useState, type ChangeEvent } from "react";
+import { analyzeStructure } from "../analysis/structural";
 import { resolveWorkflowGraph } from "../graph/resolve";
 import { parseWorkflowBytes } from "../input/parse-workflow";
 import type {
   ResolvedGraph,
+  StructuralAnalysis,
   ValidationIssue,
   WorkflowConfig,
 } from "../shared/contracts";
@@ -16,6 +18,7 @@ type ViewState =
       fileName: string;
       workflow: WorkflowConfig;
       graph: ResolvedGraph;
+      structural: StructuralAnalysis;
     };
 
 export function App() {
@@ -35,11 +38,13 @@ export function App() {
         setState({ kind: "error", fileName: file.name, issues: result.issues });
         return;
       }
+      const graph = resolveWorkflowGraph(result.workflow);
       setState({
         kind: "success",
         fileName: file.name,
         workflow: result.workflow,
-        graph: resolveWorkflowGraph(result.workflow),
+        graph,
+        structural: analyzeStructure(result.workflow, graph),
       });
     } finally {
       setBusy(false);
@@ -54,16 +59,16 @@ export function App() {
           <span className="brand-mark">AP</span>
           <span>Agent Preflight</span>
         </a>
-        <span className="read-only-badge">Read-only · Day 1</span>
+        <span className="read-only-badge">Read-only preflight</span>
       </header>
 
       <section className="hero" id="top">
-        <div className="eyebrow">OpenServ workflow review</div>
-        <h1>See the route before your agents run it.</h1>
+        <div className="eyebrow">SERV Reasoning-powered workflow review</div>
+        <h1>Know whether your agents make sense together.</h1>
         <p className="lede">
-          Upload one local <code>WorkflowConfig</code> JSON file. We validate it
-          in memory and resolve the exact explicit or client-default
-          graph—without connecting to OpenServ.
+          Agent Preflight combines exact structural checks with semantic
+          reasoning before execution. Start with one local{" "}
+          <code>WorkflowConfig</code> JSON file.
         </p>
 
         <input
@@ -71,7 +76,7 @@ export function App() {
           className="visually-hidden"
           type="file"
           accept="application/json,.json"
-          onChange={onFileChange}
+          onChange={(event) => void onFileChange(event)}
         />
         <button
           className="upload-button"
@@ -82,7 +87,8 @@ export function App() {
           {busy ? "Checking…" : "Choose workflow JSON"}
         </button>
         <p className="limits">
-          256 KiB maximum · No upload storage · No SERV request · No mutation
+          256 KiB maximum · No upload storage · No live workflow access · No
+          mutation
         </p>
       </section>
 
@@ -96,6 +102,7 @@ export function App() {
             fileName={state.fileName}
             workflow={state.workflow}
             graph={state.graph}
+            structural={state.structural}
           />
         )}
       </section>
@@ -149,20 +156,26 @@ function SuccessState({
   fileName,
   workflow,
   graph,
+  structural,
 }: {
   fileName: string;
   workflow: WorkflowConfig;
   graph: ResolvedGraph;
+  structural: StructuralAnalysis;
 }) {
   return (
     <div className="result-panel">
       <div className="result-heading">
         <div>
-          <span className="result-kicker">Local structure accepted</span>
+          <span className="result-kicker">Workflow overview</span>
           <h2>{workflow.name}</h2>
           <p>{fileName}</p>
         </div>
-        <span className="status status-ok">Schema valid</span>
+        <span
+          className={`status ${structural.passed ? "status-ok" : "status-error"}`}
+        >
+          {structural.passed ? "Structure valid" : "Structure blocked"}
+        </span>
       </div>
       <div className="summary-grid">
         <Metric label="Tasks" value={workflow.tasks?.length ?? 0} />
@@ -171,6 +184,51 @@ function SuccessState({
         <Metric label="Edge mode" value={graph.edgeMode} />
       </div>
       <WorkflowGraph graph={graph} />
+      <section className="checks-card" aria-labelledby="structural-title">
+        <div className="graph-title-row">
+          <div>
+            <span className="result-kicker">Deterministic layer</span>
+            <h3 id="structural-title">Structural checks</h3>
+          </div>
+          <strong>
+            {structural.findings.length === 0
+              ? "No structural blockers"
+              : `${structural.findings.length} findings`}
+          </strong>
+        </div>
+        {structural.findings.length === 0 ? (
+          <p className="check-pass">
+            The graph is structurally eligible for SERV semantic review.
+          </p>
+        ) : (
+          <ul className="finding-list">
+            {structural.findings.map((finding) => (
+              <li key={finding.id}>
+                <div>
+                  <span className="finding-source">STRUCTURAL</span>
+                  <code>{finding.code}</code>
+                </div>
+                <strong>{finding.title}</strong>
+                <p>
+                  {finding.evidence
+                    .map((evidence) => evidence.identifier)
+                    .join(", ")}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+      <section className="serv-gate">
+        <div>
+          <span className="result-kicker">Required semantic layer</span>
+          <h3>SERV semantic review</h3>
+          <p>A full preflight is never complete from graph validation alone.</p>
+        </div>
+        <button type="button" disabled>
+          Run SERV Preflight
+        </button>
+      </section>
     </div>
   );
 }

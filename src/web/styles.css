@@ -216,6 +216,77 @@ h1 {
   padding-top: 24px;
   border-top: 1px solid #21384b;
 }
+.checks-card,
+.serv-gate {
+  margin-top: 26px;
+  padding: 24px;
+  border: 1px solid #21384b;
+  border-radius: 18px;
+  background: #09141e;
+}
+.checks-card h3,
+.serv-gate h3 {
+  margin: 7px 0 0;
+}
+.check-pass {
+  margin: 20px 0 0;
+  padding: 14px;
+  color: #91f4d4;
+  background: #0d2a24;
+  border-radius: 12px;
+}
+.finding-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+}
+.finding-list li {
+  padding: 15px 0;
+  border-top: 1px solid #1c3041;
+}
+.finding-list li > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.finding-list strong {
+  display: block;
+  margin-top: 9px;
+}
+.finding-list p {
+  margin: 6px 0 0;
+  color: #7890a4;
+}
+.finding-source {
+  color: #ff9eaa;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+.serv-gate {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  border-color: #315274;
+  background: linear-gradient(120deg, #0b1c2a, #101b31);
+}
+.serv-gate p {
+  margin: 7px 0 0;
+  color: #8da4b8;
+}
+.serv-gate button {
+  flex: 0 0 auto;
+  padding: 13px 18px;
+  border: 0;
+  border-radius: 11px;
+  color: #071019;
+  background: #61e8bf;
+  font-weight: 800;
+}
+.serv-gate button:disabled {
+  opacity: 0.55;
+}
 .graph-title-row {
   display: flex;
   justify-content: space-between;
@@ -375,6 +446,10 @@ h1 {
     gap: 5px;
   }
   .result-heading {
+    flex-direction: column;
+  }
+  .serv-gate {
+    align-items: stretch;
     flex-direction: column;
   }
 }

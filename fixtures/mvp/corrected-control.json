@@ -1,0 +1,34 @@
+{
+  "name": "Compatible research review",
+  "goal": "Research competitors and have a second agent verify the sourced market brief.",
+  "triggers": [{ "type": "manual", "name": "Start" }],
+  "tasks": [
+    {
+      "name": "Research competitors",
+      "agentId": 101,
+      "description": "Research competitor positioning and produce a sourced prose market brief.",
+      "outputOptions": {
+        "brief": {
+          "name": "Market brief",
+          "type": "text",
+          "instructions": "Return sourced competitor findings in prose."
+        }
+      }
+    },
+    {
+      "name": "Verify brief",
+      "agentId": 202,
+      "description": "Verify the evidence and claims in the sourced prose market brief.",
+      "input": "A sourced prose market brief with competitor findings.",
+      "dependencies": ["Research competitors"]
+    }
+  ],
+  "edges": [
+    { "from": "trigger:Start", "to": "task:Research competitors" },
+    {
+      "from": "task:Research competitors",
+      "sourcePort": "brief",
+      "to": "task:Verify brief"
+    }
+  ]
+}

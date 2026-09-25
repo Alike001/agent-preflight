@@ -104,6 +104,101 @@ export interface ValidationIssue {
   message: string;
 }
 
+export type FindingSeverity = "info" | "warning" | "critical";
+export type FindingSource = "structural" | "serv";
+
+export interface FindingEvidence {
+  identifier: string;
+  explanation: string;
+}
+
+export interface PreflightFinding {
+  id: string;
+  code: string;
+  source: FindingSource;
+  category: string;
+  severity: FindingSeverity;
+  confidence: "deterministic" | "low" | "medium" | "high";
+  title: string;
+  evidence: FindingEvidence[];
+  rationale: string;
+  suggestedFix: string | null;
+}
+
+export type CombinedPreflightStatus =
+  "ready_for_review" | "warnings_found" | "blocked" | "serv_review_incomplete";
+
+export interface StructuralAnalysis {
+  findings: PreflightFinding[];
+  passed: boolean;
+}
+
+export interface SemanticEvidence {
+  identifier: string;
+  explanation: string;
+}
+
+export type SemanticCategory =
+  | "handoff_mismatch"
+  | "missing_prerequisite"
+  | "capability_mismatch"
+  | "permission_risk"
+  | "contradiction"
+  | "ambiguous_responsibility"
+  | "unsafe_escalation"
+  | "insufficient_evidence";
+
+export interface SemanticFinding {
+  id: string;
+  category: SemanticCategory;
+  severity: FindingSeverity;
+  confidence: "low" | "medium" | "high";
+  evidence: SemanticEvidence[];
+  rationale: string;
+  suggestedFix: string | null;
+}
+
+export interface SemanticReview {
+  status: "pass" | "warning" | "blocked" | "insufficient_evidence";
+  summary: string;
+  findings: SemanticFinding[];
+}
+
+export interface SemanticTaskProjection {
+  identifier: string;
+  agentId: string;
+  description: string;
+  body?: string;
+  inputExpectation?: string;
+  outputExpectations: Array<{
+    port: string;
+    name: string;
+    type: OutputOption["type"];
+    instructions: string;
+  }>;
+  dependencies: string[];
+}
+
+export interface SemanticProjection {
+  projectionVersion: "1";
+  reviewId: string;
+  workflow: { identifier: string; objective: string };
+  tasks: SemanticTaskProjection[];
+  handoffs: Array<{
+    identifier: string;
+    from: string;
+    to: string;
+    sourcePort: string;
+    targetPort: string;
+    origin: EdgeOrigin;
+  }>;
+  structuralFindings: Array<{
+    code: string;
+    severity: FindingSeverity;
+    identifiers: string[];
+  }>;
+}
+
 export type ParseResult =
   | { ok: true; workflow: WorkflowConfig }
   | { ok: false; issues: ValidationIssue[] };
