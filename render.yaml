@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: agent-preflight
+    runtime: node
+    numInstances: 1
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: SERV_API_KEY
+        sync: false
+      - key: SERV_MODEL
+        sync: false
+      - key: SERV_RATE_LIMIT_WINDOW_SECONDS
+        sync: false
+      - key: SERV_SESSION_REQUEST_LIMIT
+        sync: false
+      - key: SERV_IP_REQUEST_LIMIT
+        sync: false
+      - key: SERV_GLOBAL_REQUEST_CAP
+        sync: false
+      - key: SERV_GLOBAL_SPEND_CAP_USD
+        sync: false
+      - key: SERV_ESTIMATED_MAX_COST_PER_REQUEST_USD
+        sync: false

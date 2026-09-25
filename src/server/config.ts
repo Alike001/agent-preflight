@@ -20,6 +20,7 @@ export function loadServerConfig(
       "SERV_IP_REQUEST_LIMIT",
       "SERV_GLOBAL_REQUEST_CAP",
       "SERV_GLOBAL_SPEND_CAP_USD",
+      "SERV_ESTIMATED_MAX_COST_PER_REQUEST_USD",
     ];
     if (required.some((name) => !env[name]?.trim()))
       throw new Error(

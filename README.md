@@ -48,6 +48,32 @@ npm start
 
 Production mode requires all usage-protection variables shown in `.env.example`; startup fails closed when they are missing or invalid.
 
+## Render deployment
+
+Deploy this repository as one Render **Node Web Service**. The committed `render.yaml` fixes the service to one instance, configures `/health` as the health check, and leaves every runtime value for configuration in Render. Use these commands if configuring the service manually:
+
+```text
+Build command: npm ci && npm run build
+Start command: npm start
+```
+
+Configure all of the following in the Render environment:
+
+```text
+SERV_API_KEY
+SERV_MODEL
+SERV_RATE_LIMIT_WINDOW_SECONDS
+SERV_SESSION_REQUEST_LIMIT
+SERV_IP_REQUEST_LIMIT
+SERV_GLOBAL_REQUEST_CAP
+SERV_GLOBAL_SPEND_CAP_USD
+SERV_ESTIMATED_MAX_COST_PER_REQUEST_USD
+```
+
+Use `gpt-5.4-mini` for `SERV_MODEL`. Render supplies `PORT`; do not set a provider-specific port in source. `GET /health` returns only `{ "status": "ok" }` and never invokes SERV.
+
+The request and spending counters are deliberately held in process memory for this hackathon release. The deployment **must remain at exactly one application instance** so the per-session, per-IP, global request, and global spending limits share one counter state. Do not enable horizontal scaling without first replacing the counters with an atomic shared store; distributed infrastructure is intentionally outside this release.
+
 ## Environment variables
 
 | Variable                                  | Purpose                                                    |
@@ -113,4 +139,4 @@ See [Architecture](docs/ARCHITECTURE.md), [Safety](docs/SAFETY.md), [Implementat
 - Native `WorkflowConfig` does not expose a complete capability or permission inventory; SERV uses only explicit declarations in supplied task evidence and otherwise returns `insufficient_evidence`.
 - A clean result means `READY FOR REVIEW`, not “safe to execute.”
 - Public builder demand and the absence of a private OpenServ equivalent remain research risks.
-- The included usage guard is intentionally single-instance. Multi-instance hosting requires a shared atomic counter store.
+- The included usage guard is intentionally single-instance. The hackathon deployment must use exactly one application instance; multi-instance hosting would require a shared atomic counter store.

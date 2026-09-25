@@ -19,6 +19,11 @@ const transport = config.servApiKey
 
 app.disable("x-powered-by");
 app.set("trust proxy", 1);
+
+app.get("/health", (_request, response) => {
+  response.status(200).json({ status: "ok" });
+});
+
 app.use(express.json({ limit: "260kb", strict: true }));
 
 app.post("/api/preflight", async (request, response) => {
@@ -92,9 +97,9 @@ if (process.env.NODE_ENV === "production") {
   app.use(vite.middlewares);
 }
 
-app.listen(config.port, "127.0.0.1", () => {
+app.listen(config.port, "0.0.0.0", () => {
   process.stdout.write(
-    `Agent Preflight listening on http://127.0.0.1:${config.port}\n`,
+    `Agent Preflight listening on http://0.0.0.0:${config.port}\n`,
   );
 });
 
