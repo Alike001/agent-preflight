@@ -1,0 +1,44 @@
+{
+  "name": "Explicit support route",
+  "goal": "Turn a support webhook into a classified response.",
+  "triggers": [
+    {
+      "type": "webhook",
+      "name": "Support request",
+      "waitForCompletion": true,
+      "timeout": 120,
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "apiKey": {
+            "type": "string",
+            "description": "Credential supplied at runtime."
+          },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "name": "Classify request",
+      "agentId": 101,
+      "description": "Classify the support request.",
+      "outputOptions": {
+        "classification": {
+          "name": "Classification",
+          "type": "json",
+          "instructions": "Return the support category and confidence."
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "trigger:Support request",
+      "to": "task:Classify request",
+      "sourcePort": "default",
+      "targetPort": "input"
+    }
+  ]
+}

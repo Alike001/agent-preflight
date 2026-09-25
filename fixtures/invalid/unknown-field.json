@@ -1,0 +1,5 @@
+{
+  "name": "Unsupported configuration",
+  "goal": "Demonstrate rejection of fields outside the approved subset.",
+  "deploymentId": "not-supported"
+}

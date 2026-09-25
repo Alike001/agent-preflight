@@ -1,0 +1,37 @@
+{
+  "name": "Editorial review",
+  "goal": "Turn an approved brief into a checked publication draft.",
+  "agentIds": [101, "202"],
+  "triggers": [
+    {
+      "type": "manual",
+      "id": "manual-start",
+      "name": "Start review",
+      "description": "A builder starts the workflow with an approved brief."
+    }
+  ],
+  "tasks": [
+    {
+      "id": 1,
+      "name": "Draft article",
+      "agentId": 101,
+      "description": "Write a draft from the supplied brief.",
+      "input": "An approved editorial brief.",
+      "outputOptions": {
+        "draft": {
+          "name": "Article draft",
+          "type": "text",
+          "instructions": "Return the complete article draft."
+        }
+      }
+    },
+    {
+      "id": 2,
+      "name": "Review article",
+      "agentId": "202",
+      "description": "Check the draft against the approved brief.",
+      "body": "Identify unsupported claims and return a corrected draft.",
+      "dependencies": ["Draft article"]
+    }
+  ]
+}

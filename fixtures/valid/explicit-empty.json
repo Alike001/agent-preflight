@@ -1,0 +1,13 @@
+{
+  "name": "Disconnected review",
+  "goal": "Represent a deliberately disconnected local workflow graph.",
+  "triggers": [{ "type": "manual", "name": "Start" }],
+  "tasks": [
+    {
+      "name": "Review input",
+      "agentId": 101,
+      "description": "Review the supplied input."
+    }
+  ],
+  "edges": []
+}

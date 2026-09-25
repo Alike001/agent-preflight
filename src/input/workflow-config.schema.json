@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agent-preflight.local/schemas/workflow-config-v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name"],
+  "properties": {
+    "name": { "$ref": "#/$defs/nodeName" },
+    "goal": { "type": "string", "minLength": 1, "maxLength": 4000 },
+    "agentIds": {
+      "type": "array",
+      "maxItems": 100,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/agentId" }
+    },
+    "triggers": {
+      "type": "array",
+      "maxItems": 8,
+      "items": { "$ref": "#/$defs/trigger" }
+    },
+    "tasks": {
+      "type": "array",
+      "maxItems": 25,
+      "items": { "$ref": "#/$defs/task" }
+    },
+    "edges": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/edge" }
+    }
+  },
+  "$defs": {
+    "nodeName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "pattern": "^[^:\\r\\n]+$"
+    },
+    "agentId": {
+      "anyOf": [
+        { "type": "integer", "minimum": 1 },
+        { "type": "string", "pattern": "^[1-9][0-9]*$", "maxLength": 20 }
+      ]
+    },
+    "outputOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "instructions"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "type": { "enum": ["text", "file", "json"] },
+        "instructions": { "type": "string", "minLength": 1, "maxLength": 8000 }
+      }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "agentId", "description"],
+      "properties": {
+        "id": { "type": "integer", "minimum": 1 },
+        "name": { "$ref": "#/$defs/nodeName" },
+        "agentId": { "$ref": "#/$defs/agentId" },
+        "description": { "type": "string", "minLength": 1, "maxLength": 4000 },
+        "body": { "type": "string", "maxLength": 32000 },
+        "input": { "type": "string", "maxLength": 16000 },
+        "dependencies": {
+          "type": "array",
+          "maxItems": 24,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nodeName" }
+        },
+        "outputOptions": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 10,
+          "propertyNames": { "$ref": "#/$defs/nodeName" },
+          "additionalProperties": { "$ref": "#/$defs/outputOption" }
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to"],
+      "properties": {
+        "from": {
+          "type": "string",
+          "pattern": "^(trigger|task):[^:\\r\\n]{1,120}$"
+        },
+        "to": {
+          "type": "string",
+          "pattern": "^(trigger|task):[^:\\r\\n]{1,120}$"
+        },
+        "sourcePort": { "$ref": "#/$defs/nodeName" },
+        "targetPort": { "$ref": "#/$defs/nodeName" }
+      }
+    },
+    "trigger": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "const": "webhook" },
+            "id": { "type": "string", "minLength": 1, "maxLength": 120 },
+            "name": { "$ref": "#/$defs/nodeName" },
+            "description": { "type": "string", "maxLength": 4000 },
+            "waitForCompletion": { "type": "boolean" },
+            "timeout": { "type": "integer", "minimum": 1, "maximum": 3600 },
+            "inputSchema": { "type": "object", "maxProperties": 100 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "x402Pricing", "waitForCompletion"],
+          "properties": {
+            "type": { "const": "x402" },
+            "id": { "type": "string", "minLength": 1, "maxLength": 120 },
+            "name": { "$ref": "#/$defs/nodeName" },
+            "description": { "type": "string", "maxLength": 4000 },
+            "x402Pricing": {
+              "type": "string",
+              "pattern": "^[0-9]+(\\.[0-9]+)?$",
+              "maxLength": 32
+            },
+            "x402WalletAddress": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "timeout": { "type": "integer", "minimum": 1, "maximum": 3600 },
+            "inputSchema": { "type": "object", "maxProperties": 100 },
+            "waitForCompletion": { "const": true }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "schedule", "timezone"],
+          "properties": {
+            "type": { "const": "cron" },
+            "id": { "type": "string", "minLength": 1, "maxLength": 120 },
+            "name": { "$ref": "#/$defs/nodeName" },
+            "description": { "type": "string", "maxLength": 4000 },
+            "schedule": { "type": "string", "minLength": 1, "maxLength": 200 },
+            "timezone": { "type": "string", "minLength": 1, "maxLength": 100 }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type"],
+          "properties": {
+            "type": { "const": "manual" },
+            "id": { "type": "string", "minLength": 1, "maxLength": 120 },
+            "name": { "$ref": "#/$defs/nodeName" },
+            "description": { "type": "string", "maxLength": 4000 }
+          }
+        }
+      ]
+    }
+  }
+}
