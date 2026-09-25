@@ -13,6 +13,19 @@ export interface ServerConfig {
 export function loadServerConfig(
   env: NodeJS.ProcessEnv = process.env,
 ): ServerConfig {
+  if (env.NODE_ENV === "production") {
+    const required = [
+      "SERV_RATE_LIMIT_WINDOW_SECONDS",
+      "SERV_SESSION_REQUEST_LIMIT",
+      "SERV_IP_REQUEST_LIMIT",
+      "SERV_GLOBAL_REQUEST_CAP",
+      "SERV_GLOBAL_SPEND_CAP_USD",
+    ];
+    if (required.some((name) => !env[name]?.trim()))
+      throw new Error(
+        "Production usage protection configuration is incomplete.",
+      );
+  }
   return {
     port: positiveInteger(env.PORT, 8787),
     servApiKey: env.SERV_API_KEY?.trim() ?? "",

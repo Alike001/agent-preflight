@@ -11,9 +11,7 @@ import type {
   ValidationIssue,
   WorkflowConfig,
 } from "../shared/contracts";
-import { PreflightReportView } from "./PreflightReportView";
-import { CorrectionWorkspace } from "./CorrectionWorkspace";
-import { WorkflowGraph } from "./WorkflowGraph";
+import { EmptyState, ErrorState, WorkflowWorkspace } from "./WorkflowWorkspace";
 
 type ViewState =
   | { kind: "empty" }
@@ -85,9 +83,19 @@ export function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ workflow: state.workflow }),
       });
+      setState((current) =>
+        current.kind === "success"
+          ? { ...current, scanPhase: "Validating SERV response…" }
+          : current,
+      );
       const payload: unknown = await response.json();
       if (!response.ok || !isPreflightReport(payload))
         throw new Error(readSafeApiMessage(payload));
+      setState((current) =>
+        current.kind === "success"
+          ? { ...current, scanPhase: "Building preflight report…" }
+          : current,
+      );
       setState((current) =>
         current.kind === "success"
           ? { ...current, report: payload, scanPhase: undefined }
@@ -174,7 +182,7 @@ export function App() {
           <ErrorState fileName={state.fileName} issues={state.issues} />
         )}
         {state.kind === "success" && (
-          <SuccessState
+          <WorkflowWorkspace
             fileName={state.fileName}
             workflow={state.workflow}
             graph={state.graph}
@@ -196,150 +204,6 @@ export function App() {
   );
 }
 
-function EmptyState() {
-  return (
-    <div className="empty-state">
-      <span className="empty-icon">⌁</span>
-      <h2>Your effective graph will appear here</h2>
-      <p>
-        Omitted edges become the client’s sequential route. An explicit empty
-        edge list stays empty.
-      </p>
-    </div>
-  );
-}
-
-function ErrorState({
-  fileName,
-  issues,
-}: {
-  fileName: string;
-  issues: ValidationIssue[];
-}) {
-  return (
-    <div className="result-panel error-panel">
-      <div className="result-heading">
-        <div>
-          <span className="result-kicker">Input rejected</span>
-          <h2>{fileName}</h2>
-        </div>
-        <span className="status status-error">Not scanned</span>
-      </div>
-      <ul className="issue-list">
-        {issues.map((issue, index) => (
-          <li key={`${issue.code}-${issue.path}-${index}`}>
-            <code>{issue.code}</code>
-            <strong>{issue.path}</strong>
-            <span>{issue.message}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function SuccessState({
-  fileName,
-  workflow,
-  graph,
-  structural,
-  report,
-  scanPhase,
-  scanError,
-  onRun,
-  onLocalCopy,
-}: {
-  fileName: string;
-  workflow: WorkflowConfig;
-  graph: ResolvedGraph;
-  structural: StructuralAnalysis;
-  report?: PreflightReport;
-  scanPhase?: string;
-  scanError?: string;
-  onRun: () => void;
-  onLocalCopy: (draft: string) => void;
-}) {
-  return (
-    <div className="result-panel">
-      <div className="result-heading">
-        <div>
-          <span className="result-kicker">Workflow overview</span>
-          <h2>{workflow.name}</h2>
-          <p>{fileName}</p>
-        </div>
-        <span
-          className={`status ${structural.passed ? "status-ok" : "status-error"}`}
-        >
-          {structural.passed ? "Structure valid" : "Structure blocked"}
-        </span>
-      </div>
-      <div className="summary-grid">
-        <Metric label="Tasks" value={workflow.tasks?.length ?? 0} />
-        <Metric label="Triggers" value={workflow.triggers?.length ?? 0} />
-        <Metric label="Effective edges" value={graph.edges.length} />
-        <Metric label="Edge mode" value={graph.edgeMode} />
-      </div>
-      <WorkflowGraph graph={graph} />
-      <section className="checks-card" aria-labelledby="structural-title">
-        <div className="graph-title-row">
-          <div>
-            <span className="result-kicker">Deterministic layer</span>
-            <h3 id="structural-title">Structural checks</h3>
-          </div>
-          <strong>
-            {structural.findings.length === 0
-              ? "No structural blockers"
-              : `${structural.findings.length} findings`}
-          </strong>
-        </div>
-        {structural.findings.length === 0 ? (
-          <p className="check-pass">
-            The graph is structurally eligible for SERV semantic review.
-          </p>
-        ) : (
-          <ul className="finding-list">
-            {structural.findings.map((finding) => (
-              <li key={finding.id}>
-                <div>
-                  <span className="finding-source">STRUCTURAL</span>
-                  <code>{finding.code}</code>
-                </div>
-                <strong>{finding.title}</strong>
-                <p>
-                  {finding.evidence
-                    .map((evidence) => evidence.identifier)
-                    .join(", ")}
-                </p>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-      <section className="serv-gate">
-        <div>
-          <span className="result-kicker">Required semantic layer</span>
-          <h3>SERV semantic review</h3>
-          <p>A full preflight is never complete from graph validation alone.</p>
-        </div>
-        <button type="button" disabled={Boolean(scanPhase)} onClick={onRun}>
-          {scanPhase ?? (report ? "Rescan with SERV" : "Run SERV Preflight")}
-        </button>
-      </section>
-      {scanError && (
-        <div className="scan-error" role="alert">
-          <strong>SERV REVIEW INCOMPLETE</strong>
-          <p>{scanError}</p>
-          <p>Structural analysis only - SERV semantic review unavailable.</p>
-        </div>
-      )}
-      {report && <PreflightReportView report={report} />}
-      {report && (
-        <CorrectionWorkspace original={workflow} onRescan={onLocalCopy} />
-      )}
-    </div>
-  );
-}
-
 function isPreflightReport(value: unknown): value is PreflightReport {
   return (
     typeof value === "object" &&
@@ -358,13 +222,4 @@ function readSafeApiMessage(value: unknown): string {
   )
     return value.message;
   return "SERV semantic review could not be completed. Structural findings are preserved.";
-}
-
-function Metric({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="metric">
-      <span>{label}</span>
-      <strong>{value}</strong>
-    </div>
-  );
 }

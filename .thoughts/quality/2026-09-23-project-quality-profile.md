@@ -2,13 +2,14 @@
 
 ## Detected Stack
 
-Vite 8, React 19, TypeScript 7, Ajv 8, and Vitest 5 on Node.js 22.12 or newer.
+Vite 8, React 19, TypeScript 6, Ajv 8, Express 5, OpenAI SDK 7, and Vitest 5 on Node.js 22.12 or newer.
 
 ## Existing Commands
 
 - `npm run format:check`
 - `npm run typecheck`
 - `npm test`
+- `npm run lint`
 - `npm run build`
 
 ## Required Local Checks

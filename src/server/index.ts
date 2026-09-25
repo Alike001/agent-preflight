@@ -61,6 +61,21 @@ app.post("/api/preflight", async (request, response) => {
   }
 });
 
+app.use(
+  (
+    error: unknown,
+    _request: express.Request,
+    response: express.Response,
+    next: express.NextFunction,
+  ) => {
+    if (!error) return next();
+    response.status(400).json({
+      code: "INPUT_INVALID_JSON",
+      message: "The request body must contain one valid JSON object.",
+    });
+  },
+);
+
 if (process.env.NODE_ENV === "production") {
   const root = path.dirname(fileURLToPath(import.meta.url));
   const clientDir = path.resolve(root, "../dist");

@@ -4,6 +4,7 @@ import { analyzeStructure } from "../src/analysis/structural";
 import { resolveWorkflowGraph } from "../src/graph/resolve";
 import { mapSemanticFindings } from "../src/serv/map-findings";
 import { parseAndValidateSemanticReview } from "../src/serv/validate";
+import { buildServRequest, SERV_BASE_URL } from "../src/server/serv-client";
 import type { SemanticReview, WorkflowConfig } from "../src/shared/contracts";
 
 const workflow: WorkflowConfig = {
@@ -55,6 +56,23 @@ const validReview: SemanticReview = {
 };
 
 describe("SERV result validation", () => {
+  it("builds the exact request contract with a system prompt and no temperature", () => {
+    const request = buildServRequest("gpt-5.4-mini", projection());
+    expect(SERV_BASE_URL).toBe("https://inference-api.openserv.ai/v1");
+    expect(request).toMatchObject({
+      model: "gpt-5.4-mini",
+      reasoning_effort: "low",
+      messages: [{ role: "system" }, { role: "user" }],
+      response_format: {
+        type: "json_schema",
+        json_schema: { strict: true },
+      },
+    });
+    expect(request).not.toHaveProperty("temperature");
+    expect(request.messages[0].content.toLowerCase()).toContain(
+      "review an agent workflow before execution",
+    );
+  });
   it("accepts schema-valid evidence and maps application-owned codes", () => {
     const review = parseAndValidateSemanticReview(
       JSON.stringify(validReview),
@@ -88,5 +106,13 @@ describe("SERV result validation", () => {
     expect(() =>
       parseAndValidateSemanticReview(JSON.stringify(invalid), projection()),
     ).toThrow("unsafe suggested correction");
+  });
+
+  it("rejects inconsistent passing output", () => {
+    const invalid = structuredClone(validReview);
+    invalid.status = "pass";
+    expect(() =>
+      parseAndValidateSemanticReview(JSON.stringify(invalid), projection()),
+    ).toThrow("inconsistent pass status");
   });
 });

@@ -26,6 +26,14 @@ button,
 input {
   font: inherit;
 }
+button:focus-visible,
+a:focus-visible,
+textarea:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #8ce8f4;
+  outline-offset: 3px;
+}
 code {
   font-family: "SFMono-Regular", Consolas, monospace;
 }
@@ -621,5 +629,14 @@ h1 {
   }
   .decision-banner {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
   }
 }

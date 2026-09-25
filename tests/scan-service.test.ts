@@ -139,3 +139,11 @@ describe("preflight service", () => {
     expect(transport).not.toHaveBeenCalled();
   });
 });
+
+describe("production configuration", () => {
+  it("fails closed when public usage protection settings are absent", () => {
+    expect(() => loadServerConfig({ NODE_ENV: "production" })).toThrow(
+      "Production usage protection configuration is incomplete",
+    );
+  });
+});

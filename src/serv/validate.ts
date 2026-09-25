@@ -56,6 +56,26 @@ export function parseAndValidateSemanticReview(
       );
     }
   }
+  if (parsed.status === "pass" && parsed.findings.length > 0)
+    throw new InvalidSemanticReviewError(
+      "SERV returned an inconsistent pass status.",
+    );
+  if (
+    parsed.status === "blocked" &&
+    !parsed.findings.some((finding) => finding.severity === "critical")
+  )
+    throw new InvalidSemanticReviewError(
+      "SERV returned an inconsistent blocked status.",
+    );
+  if (
+    parsed.status === "insufficient_evidence" &&
+    !parsed.findings.some(
+      (finding) => finding.category === "insufficient_evidence",
+    )
+  )
+    throw new InvalidSemanticReviewError(
+      "SERV returned an inconsistent evidence status.",
+    );
   return parsed;
 }
 
