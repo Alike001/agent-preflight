@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { createSemanticProjection } from "../analysis/projection";
 import { analyzeStructure } from "../analysis/structural";
 import { resolveWorkflowGraph } from "../graph/resolve";
@@ -23,6 +23,9 @@ export async function runPreflight(
 ): Promise<PreflightReport> {
   const scanId = randomUUID();
   const graph = resolveWorkflowGraph(workflow);
+  const inputFingerprint = createHash("sha256")
+    .update(JSON.stringify(workflow))
+    .digest("hex");
   const structural = analyzeStructure(workflow, graph);
   const projection = createSemanticProjection(
     scanId,
@@ -52,6 +55,7 @@ export async function runPreflight(
       schemaVersion: "1",
       scanId,
       generatedAt: new Date().toISOString(),
+      inputFingerprint,
       workflow: { name: workflow.name, goal: workflow.goal ?? "" },
       graph,
       status,
@@ -88,6 +92,7 @@ export async function runPreflight(
       scanId,
       config.servModel,
       safeErrorMessage(error),
+      inputFingerprint,
     );
   }
 }
@@ -99,11 +104,13 @@ function incompleteReport(
   scanId: string,
   model: string,
   summary: string,
+  inputFingerprint: string,
 ): PreflightReport {
   return {
     schemaVersion: "1",
     scanId,
     generatedAt: new Date().toISOString(),
+    inputFingerprint,
     workflow: { name: workflow.name, goal: workflow.goal ?? "" },
     graph,
     status: "serv_review_incomplete",

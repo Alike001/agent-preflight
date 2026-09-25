@@ -1,4 +1,8 @@
 import type { PreflightFinding, PreflightReport } from "../shared/contracts";
+import {
+  serializeJsonReport,
+  serializeMarkdownReport,
+} from "../results/reports";
 
 export function PreflightReportView({ report }: { report: PreflightReport }) {
   return (
@@ -48,8 +52,53 @@ export function PreflightReportView({ report }: { report: PreflightReport }) {
           Not applied · Suggestions affect no live workflow.
         </p>
       </section>
+      <section className="review-section" aria-labelledby="export-title">
+        <span className="result-kicker">Portable evidence</span>
+        <h3 id="export-title">Export report</h3>
+        <p className="review-summary">
+          Reports contain the input fingerprint and reviewed evidence, never the
+          original upload or credentials.
+        </p>
+        <div className="action-row">
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() =>
+              download(
+                "agent-preflight-report.json",
+                serializeJsonReport(report),
+                "application/json",
+              )
+            }
+          >
+            Download JSON
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() =>
+              download(
+                "agent-preflight-report.md",
+                serializeMarkdownReport(report),
+                "text/markdown",
+              )
+            }
+          >
+            Download Markdown
+          </button>
+        </div>
+      </section>
     </section>
   );
+}
+
+function download(fileName: string, content: string, type: string) {
+  const url = URL.createObjectURL(new Blob([content], { type }));
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  anchor.click();
+  URL.revokeObjectURL(url);
 }
 
 function FindingList({

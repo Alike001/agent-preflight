@@ -203,6 +203,7 @@ export interface PreflightReport {
   schemaVersion: "1";
   scanId: string;
   generatedAt: string;
+  inputFingerprint: string;
   workflow: { name: string; goal: string };
   graph: ResolvedGraph;
   status: CombinedPreflightStatus;

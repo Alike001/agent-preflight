@@ -1,4 +1,6 @@
 import { useRef, useState, type ChangeEvent } from "react";
+import correctedControl from "../../fixtures/mvp/corrected-control.json";
+import semanticMismatch from "../../fixtures/mvp/semantic-mismatch.json";
 import { analyzeStructure } from "../analysis/structural";
 import { resolveWorkflowGraph } from "../graph/resolve";
 import { parseWorkflowBytes } from "../input/parse-workflow";
@@ -10,6 +12,7 @@ import type {
   WorkflowConfig,
 } from "../shared/contracts";
 import { PreflightReportView } from "./PreflightReportView";
+import { CorrectionWorkspace } from "./CorrectionWorkspace";
 import { WorkflowGraph } from "./WorkflowGraph";
 
 type ViewState =
@@ -36,25 +39,31 @@ export function App() {
     if (!file) return;
     setBusy(true);
     try {
-      const result = parseWorkflowBytes(
-        new Uint8Array(await file.arrayBuffer()),
-      );
-      if (!result.ok) {
-        setState({ kind: "error", fileName: file.name, issues: result.issues });
-        return;
-      }
-      const graph = resolveWorkflowGraph(result.workflow);
-      setState({
-        kind: "success",
-        fileName: file.name,
-        workflow: result.workflow,
-        graph,
-        structural: analyzeStructure(result.workflow, graph),
-      });
+      loadBytes(new Uint8Array(await file.arrayBuffer()), file.name);
     } finally {
       setBusy(false);
       event.target.value = "";
     }
+  }
+
+  function loadBytes(bytes: Uint8Array, fileName: string) {
+    const result = parseWorkflowBytes(bytes);
+    if (!result.ok) {
+      setState({ kind: "error", fileName, issues: result.issues });
+      return;
+    }
+    const graph = resolveWorkflowGraph(result.workflow);
+    setState({
+      kind: "success",
+      fileName,
+      workflow: result.workflow,
+      graph,
+      structural: analyzeStructure(result.workflow, graph),
+    });
+  }
+
+  function loadFixture(fixture: unknown, fileName: string) {
+    loadBytes(new TextEncoder().encode(JSON.stringify(fixture)), fileName);
   }
 
   async function runServPreflight() {
@@ -138,6 +147,25 @@ export function App() {
           256 KiB maximum · No upload storage · No live workflow access · No
           mutation
         </p>
+        <div className="demo-row" aria-label="Synthetic demo workflows">
+          <span>Synthetic demos:</span>
+          <button
+            type="button"
+            onClick={() =>
+              loadFixture(semanticMismatch, "semantic-mismatch.demo.json")
+            }
+          >
+            Semantic mismatch
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              loadFixture(correctedControl, "corrected-control.demo.json")
+            }
+          >
+            Corrected control
+          </button>
+        </div>
       </section>
 
       <section className="workspace" aria-live="polite">
@@ -155,6 +183,12 @@ export function App() {
             scanPhase={state.scanPhase}
             scanError={state.scanError}
             onRun={() => void runServPreflight()}
+            onLocalCopy={(draft) =>
+              loadBytes(
+                new TextEncoder().encode(draft),
+                "local-working-copy.json",
+              )
+            }
           />
         )}
       </section>
@@ -213,6 +247,7 @@ function SuccessState({
   scanPhase,
   scanError,
   onRun,
+  onLocalCopy,
 }: {
   fileName: string;
   workflow: WorkflowConfig;
@@ -222,6 +257,7 @@ function SuccessState({
   scanPhase?: string;
   scanError?: string;
   onRun: () => void;
+  onLocalCopy: (draft: string) => void;
 }) {
   return (
     <div className="result-panel">
@@ -297,6 +333,9 @@ function SuccessState({
         </div>
       )}
       {report && <PreflightReportView report={report} />}
+      {report && (
+        <CorrectionWorkspace original={workflow} onRescan={onLocalCopy} />
+      )}
     </div>
   );
 }

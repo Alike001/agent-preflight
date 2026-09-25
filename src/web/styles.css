@@ -129,6 +129,28 @@ h1 {
   font-size: 12px;
   margin-top: 14px;
 }
+.demo-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #70869a;
+  font-size: 12px;
+}
+.demo-row button,
+.secondary-button {
+  border: 1px solid #31506a;
+  border-radius: 9px;
+  padding: 8px 11px;
+  color: #c9d8e5;
+  background: #0c1a26;
+  cursor: pointer;
+}
+.demo-row button:hover,
+.secondary-button:hover {
+  border-color: #61e8bf;
+}
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -365,6 +387,72 @@ h1 {
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.09em;
+}
+.correction-workspace textarea {
+  width: 100%;
+  min-height: 320px;
+  resize: vertical;
+  border: 1px solid #29445a;
+  border-radius: 12px;
+  padding: 16px;
+  color: #dceaf5;
+  background: #06111a;
+  font:
+    12px/1.55 "SFMono-Regular",
+    Consolas,
+    monospace;
+}
+.editor-label {
+  display: block;
+  margin: 18px 0 8px;
+  color: #9eb0c0;
+  font-size: 12px;
+  font-weight: 700;
+}
+.diff-preview {
+  margin-top: 14px;
+  color: #a8b9c9;
+}
+.diff-preview summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.diff-preview p {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr;
+  gap: 10px;
+  align-items: start;
+}
+.diff-preview del,
+.diff-preview ins {
+  padding: 8px;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+  font:
+    11px/1.4 "SFMono-Regular",
+    Consolas,
+    monospace;
+}
+.diff-preview del {
+  color: #ffadb6;
+  background: #381820;
+}
+.diff-preview ins {
+  color: #9af2d6;
+  background: #10362c;
+}
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+.compact-button {
+  margin-top: 0;
+}
+.status-warning {
+  color: #f1cf82;
+  background: #3e3219;
 }
 .graph-title-row {
   display: flex;
