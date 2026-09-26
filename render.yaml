@@ -2,6 +2,7 @@ services:
   - type: web
     name: agent-preflight
     runtime: node
+    plan: free
     numInstances: 1
     buildCommand: npm ci && npm run build
     startCommand: npm start
