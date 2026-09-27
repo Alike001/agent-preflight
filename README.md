@@ -6,6 +6,10 @@ A workflow can have valid nodes and connections while still being logically brok
 
 **Live demo:** https://agent-preflight-m73t.onrender.com
 
+**Demo video:** https://youtu.be/NnW8UtS13p8
+
+**Hackathon submission post:** https://x.com/IamAlikeX/status/2104152719749710329?s=20
+
 ## Why SERV Reasoning is essential
 
 A normal graph validator can prove that two nodes exist and an edge connects them. It cannot reliably determine whether a research brief satisfies a contract-execution task, whether required semantic prerequisites exist, whether explicitly declared permissions are justified by task intent, or whether important responsibilities contradict each other or have no owner.
