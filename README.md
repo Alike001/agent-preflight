@@ -4,6 +4,8 @@
 
 A workflow can have valid nodes and connections while still being logically broken. Agent Preflight checks a local OpenServ `WorkflowConfig` deterministically, then uses SERV Reasoning to catch semantic handoff failures before execution and return evidence with human-controlled repair suggestions. It never connects to or mutates a live OpenServ workflow.
 
+**Live demo:** https://agent-preflight-m73t.onrender.com
+
 ## Why SERV Reasoning is essential
 
 A normal graph validator can prove that two nodes exist and an edge connects them. It cannot reliably determine whether a research brief satisfies a contract-execution task, whether required semantic prerequisites exist, whether explicitly declared permissions are justified by task intent, or whether important responsibilities contradict each other or have no owner.
