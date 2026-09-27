@@ -114,8 +114,15 @@ h1 {
 .lede code {
   color: #d5e5f4;
 }
-.upload-button {
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-top: 30px;
+}
+.upload-button {
   padding: 14px 22px;
   border: 0;
   border-radius: 12px;
@@ -131,6 +138,10 @@ h1 {
 .upload-button:disabled {
   cursor: wait;
   opacity: 0.6;
+}
+.hero-upload-button {
+  padding: 13px 18px;
+  font-weight: 700;
 }
 .limits {
   color: #70869a;
@@ -159,6 +170,41 @@ h1 {
 .secondary-button:hover {
   border-color: #61e8bf;
 }
+.product-steps {
+  width: min(720px, 100%);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  margin: 30px auto 0;
+  padding: 1px;
+  list-style: none;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #254156;
+}
+.product-steps li {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 16px;
+  color: #b8c8d6;
+  background: #0c1924;
+  font-size: 12px;
+}
+.product-steps span {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  color: #071019;
+  background: #61e8bf;
+  font:
+    800 11px/1 "SFMono-Regular",
+    Consolas,
+    monospace;
+}
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -186,8 +232,16 @@ h1 {
   color: #7890a4;
 }
 .empty-state h2 {
+  max-width: 620px;
   color: #d9e7f4;
   margin: 12px 0 2px;
+  text-wrap: balance;
+}
+.empty-state p {
+  max-width: 620px;
+  margin: 10px auto 0;
+  line-height: 1.6;
+  text-wrap: pretty;
 }
 .empty-icon {
   font-size: 52px;
@@ -217,6 +271,14 @@ h1 {
 .status-error {
   background: #471d25;
   color: #ff9eaa;
+}
+.status-pending {
+  color: #f1cf82;
+  background: #3e3219;
+}
+.status-running {
+  color: #8ce8f4;
+  background: #153b45;
 }
 .summary-grid {
   display: grid;
@@ -261,8 +323,9 @@ h1 {
 .check-pass {
   margin: 20px 0 0;
   padding: 14px;
-  color: #91f4d4;
-  background: #0d2a24;
+  color: #f1cf82;
+  background: #2a2314;
+  border: 1px solid #6f5a2b;
   border-radius: 12px;
 }
 .finding-list {
@@ -348,6 +411,15 @@ h1 {
   margin: 8px 0 0;
   font-size: 28px;
 }
+.decision-summary {
+  display: block;
+  color: #edf4ff;
+  font-size: 18px;
+  line-height: 1.45;
+}
+.decision-summary + p {
+  margin-bottom: 0;
+}
 .decision-ready_for_review {
   border-color: #236b58;
   background: #0d2a24;
@@ -364,6 +436,17 @@ h1 {
   flex-wrap: wrap;
   gap: 9px;
   align-items: center;
+}
+.detailed-findings .finding-title {
+  margin-top: 0;
+  color: #edf4ff;
+  font-size: 17px;
+  line-height: 1.4;
+}
+.detailed-findings .finding-title + p {
+  margin: 7px 0 12px;
+  color: #a8b9c9;
+  line-height: 1.55;
 }
 .severity {
   padding: 4px 7px;
@@ -604,6 +687,12 @@ h1 {
   }
   .hero {
     padding-top: 52px;
+  }
+  .product-steps {
+    grid-template-columns: 1fr;
+  }
+  .product-steps li {
+    justify-content: flex-start;
   }
   .summary-grid {
     grid-template-columns: repeat(2, 1fr);

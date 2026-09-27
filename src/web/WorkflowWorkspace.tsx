@@ -13,10 +13,10 @@ export function EmptyState() {
   return (
     <div className="empty-state">
       <span className="empty-icon">⌁</span>
-      <h2>Your effective graph will appear here</h2>
+      <h2>A valid graph can still contain a broken workflow.</h2>
       <p>
-        Omitted edges become the client’s sequential route. An explicit empty
-        edge list stays empty.
+        Try the broken example. Its nodes and connections pass structural
+        checks, then SERV reviews whether the agents can actually work together.
       </p>
     </div>
   );
@@ -81,9 +81,9 @@ export function WorkflowWorkspace({
           <p>{fileName}</p>
         </div>
         <span
-          className={`status ${structural.passed ? "status-ok" : "status-error"}`}
+          className={`status ${workflowStatusClass(structural, report, scanPhase, scanError)}`}
         >
-          {structural.passed ? "Structure valid" : "Structure blocked"}
+          {workflowStatusLabel(structural, report, scanPhase, scanError)}
         </span>
       </div>
       <div className="summary-grid">
@@ -97,8 +97,11 @@ export function WorkflowWorkspace({
       <section className="serv-gate">
         <div>
           <span className="result-kicker">Required semantic layer</span>
-          <h3>SERV semantic review</h3>
-          <p>A full preflight is never complete from graph validation alone.</p>
+          <h3>Does this workflow actually make sense?</h3>
+          <p>
+            SERV checks whether each agent receives what it needs, hands off
+            usable output, and has permissions justified by its task.
+          </p>
         </div>
         <button type="button" disabled={Boolean(scanPhase)} onClick={onRun}>
           {scanPhase ?? (report ? "Rescan with SERV" : "Run SERV Preflight")}
@@ -135,7 +138,7 @@ function StructuralChecks({ structural }: { structural: StructuralAnalysis }) {
       </div>
       {structural.findings.length === 0 ? (
         <p className="check-pass">
-          The graph is structurally eligible for SERV semantic review.
+          Graph shape is valid. Semantic preflight is still required.
         </p>
       ) : (
         <ul className="finding-list">
@@ -157,6 +160,34 @@ function StructuralChecks({ structural }: { structural: StructuralAnalysis }) {
       )}
     </section>
   );
+}
+
+function workflowStatusLabel(
+  structural: StructuralAnalysis,
+  report: PreflightReport | undefined,
+  scanPhase: string | undefined,
+  scanError: string | undefined,
+): string {
+  if (!structural.passed) return "STRUCTURE BLOCKED";
+  if (scanPhase) return "SERV REVIEW RUNNING";
+  if (report) return report.statusLabel;
+  if (scanError) return "SERV REVIEW INCOMPLETE";
+  return "STRUCTURE VALID · SERV REQUIRED";
+}
+
+function workflowStatusClass(
+  structural: StructuralAnalysis,
+  report: PreflightReport | undefined,
+  scanPhase: string | undefined,
+  scanError: string | undefined,
+): string {
+  if (!structural.passed) return "status-error";
+  if (scanPhase) return "status-running";
+  if (scanError) return "status-error";
+  if (!report) return "status-pending";
+  if (report.status === "ready_for_review") return "status-ok";
+  if (report.status === "warnings_found") return "status-warning";
+  return "status-error";
 }
 
 function Metric({ label, value }: { label: string; value: string | number }) {

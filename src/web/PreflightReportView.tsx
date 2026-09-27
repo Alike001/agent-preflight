@@ -5,6 +5,8 @@ import {
 } from "../results/reports";
 
 export function PreflightReportView({ report }: { report: PreflightReport }) {
+  const semanticCount = report.semantic.findings.length;
+
   return (
     <section className="preflight-report" aria-labelledby="combined-status">
       <div className={`decision-banner decision-${report.status}`}>
@@ -12,14 +14,23 @@ export function PreflightReportView({ report }: { report: PreflightReport }) {
           <span className="result-kicker">Combined preflight status</span>
           <h3 id="combined-status">{report.statusLabel}</h3>
         </div>
-        <p>{report.readOnlyDeclaration}</p>
+        <div>
+          <strong className="decision-summary">
+            {combinedResultSummary(report, semanticCount)}
+          </strong>
+          <p>{report.readOnlyDeclaration}</p>
+        </div>
       </div>
 
       <section className="review-section" aria-labelledby="serv-review-title">
         <div className="graph-title-row">
           <div>
             <span className="finding-source serv-source">SERV REASONING</span>
-            <h3 id="serv-review-title">SERV Semantic Review</h3>
+            <h3 id="serv-review-title">
+              {report.status === "blocked"
+                ? "Why SERV blocked this workflow"
+                : "SERV Semantic Review"}
+            </h3>
           </div>
           <span
             className={`status ${report.semantic.completed ? "status-ok" : "status-error"}`}
@@ -49,7 +60,8 @@ export function PreflightReportView({ report }: { report: PreflightReport }) {
           </p>
         )}
         <p className="not-applied">
-          Not applied · Suggestions affect no live workflow.
+          Suggested, not applied · Local working copy only · No live workflow
+          changes
         </p>
       </section>
       <section className="review-section" aria-labelledby="export-title">
@@ -112,6 +124,8 @@ function FindingList({
     <ul className="finding-list detailed-findings">
       {findings.map((finding) => (
         <li key={`${showFix ? "fix" : "finding"}-${finding.id}`}>
+          <strong className="finding-title">{finding.title}</strong>
+          <p>{showFix ? finding.suggestedFix : finding.rationale}</p>
           <div className="finding-heading">
             <span className="finding-source serv-source">
               {finding.source === "serv" ? "SERV REASONING" : "STRUCTURAL"}
@@ -121,8 +135,6 @@ function FindingList({
               {finding.severity}
             </span>
           </div>
-          <strong>{finding.title}</strong>
-          <p>{showFix ? finding.suggestedFix : finding.rationale}</p>
           {!showFix && (
             <ul className="evidence-list">
               {finding.evidence.map((evidence) => (
@@ -136,4 +148,24 @@ function FindingList({
       ))}
     </ul>
   );
+}
+
+function combinedResultSummary(
+  report: PreflightReport,
+  semanticCount: number,
+): string {
+  const issues = `${semanticCount} semantic ${semanticCount === 1 ? "issue" : "issues"}`;
+
+  switch (report.status) {
+    case "blocked":
+      return report.structural.passed
+        ? `Structure passed, but SERV found ${issues}.`
+        : `Structural checks blocked this workflow${semanticCount > 0 ? `, and SERV found ${issues}` : ""}.`;
+    case "warnings_found":
+      return `SERV completed and found ${issues} that need review.`;
+    case "ready_for_review":
+      return "Structural and semantic review completed. Human review is still required.";
+    case "serv_review_incomplete":
+      return "Structural findings are preserved, but SERV review did not complete.";
+  }
 }

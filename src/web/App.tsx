@@ -129,11 +129,11 @@ export function App() {
 
       <section className="hero" id="top">
         <div className="eyebrow">SERV Reasoning-powered workflow review</div>
-        <h1>Know whether your agents make sense together.</h1>
+        <h1>Catch broken agent handoffs before they run.</h1>
         <p className="lede">
-          Agent Preflight combines exact structural checks with semantic
-          reasoning before execution. Start with one local{" "}
-          <code>WorkflowConfig</code> JSON file.
+          Upload an OpenServ workflow. Agent Preflight checks its structure,
+          then uses SERV Reasoning to catch mismatched handoffs, missing
+          prerequisites, and unjustified permissions before execution.
         </p>
 
         <input
@@ -143,37 +143,54 @@ export function App() {
           accept="application/json,.json"
           onChange={(event) => void onFileChange(event)}
         />
-        <button
-          className="upload-button"
-          type="button"
-          disabled={busy}
-          onClick={() => inputRef.current?.click()}
-        >
-          {busy ? "Checking…" : "Choose workflow JSON"}
-        </button>
-        <p className="limits">
-          256 KiB maximum · No upload storage · No live workflow access · No
-          mutation
-        </p>
-        <div className="demo-row" aria-label="Synthetic demo workflows">
-          <span>Synthetic demos:</span>
+        <div className="hero-actions">
           <button
+            className="upload-button"
             type="button"
             onClick={() =>
               loadFixture(semanticMismatch, "semantic-mismatch.demo.json")
             }
           >
-            Semantic mismatch
+            Try broken workflow
           </button>
+          <button
+            className="secondary-button hero-upload-button"
+            type="button"
+            disabled={busy}
+            onClick={() => inputRef.current?.click()}
+          >
+            {busy ? "Checking…" : "Upload workflow JSON"}
+          </button>
+        </div>
+        <p className="limits">
+          256 KiB maximum · No upload storage · No live workflow access · No
+          mutation
+        </p>
+        <div className="demo-row" aria-label="Synthetic demo workflows">
+          <span>After the broken example:</span>
           <button
             type="button"
             onClick={() =>
               loadFixture(correctedControl, "corrected-control.demo.json")
             }
           >
-            Corrected control
+            View corrected workflow
           </button>
         </div>
+        <ol className="product-steps" aria-label="How Agent Preflight works">
+          <li>
+            <span>1</span>
+            <strong>Check structure</strong>
+          </li>
+          <li>
+            <span>2</span>
+            <strong>SERV checks meaning</strong>
+          </li>
+          <li>
+            <span>3</span>
+            <strong>Review and repair</strong>
+          </li>
+        </ol>
       </section>
 
       <section className="workspace" aria-live="polite">

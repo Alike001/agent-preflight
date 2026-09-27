@@ -1,8 +1,8 @@
 # Agent Preflight
 
-> Agent Preflight uses SERV Reasoning to semantically review agent workflows before execution, combining bounded AI judgment with deterministic structural checks and human-controlled repairs.
+> Agent Preflight catches broken agent handoffs before the workflow runs.
 
-Agent Preflight accepts a local OpenServ `WorkflowConfig` JSON file, proves graph facts deterministically, sends only a secret-safe semantic projection to SERV, and returns a combined report with exact evidence and local-only repair suggestions. It never connects to or mutates a live OpenServ workflow.
+A workflow can have valid nodes and connections while still being logically broken. Agent Preflight checks a local OpenServ `WorkflowConfig` deterministically, then uses SERV Reasoning to catch semantic handoff failures before execution and return evidence with human-controlled repair suggestions. It never connects to or mutates a live OpenServ workflow.
 
 ## Why SERV Reasoning is essential
 
@@ -92,12 +92,12 @@ Never prefix the key or model with `VITE_`; Vite-prefixed variables are browser-
 
 ## Demo in about 30 seconds
 
-1. Choose **Semantic mismatch** under Synthetic demos.
+1. Choose **Try broken workflow**.
 2. Observe that deterministic structural checks pass.
 3. Select **Run SERV Preflight**.
 4. Open the SERV evidence showing the research output cannot satisfy the contract-execution input.
 5. Review the proposed local repair; it is visibly marked **Not applied**.
-6. Load **Corrected control**, run SERV again, and receive `READY FOR REVIEW` only if the required semantic review succeeds.
+6. Choose **View corrected workflow**, run SERV again, and receive `READY FOR REVIEW` only if the required semantic review succeeds.
 
 The intended story is simple: the graph is valid, SERV sees that the workflow meaning is not, and the developer corrects only a local copy before execution.
 
