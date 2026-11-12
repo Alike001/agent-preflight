@@ -21,6 +21,19 @@ This is an original companion proof-of-concept inspired by the existing Akmatori
 
 The fully integrated Akmatori/SERV incident workflow and independently observed recovery remain separate unfinished milestones. We will not claim them prematurely.
 
+## Controlled real HTTP probe
+
+A new button on the evidence panel makes an **actual HTTP request** to a fixed,
+deliberately failing endpoint on the SAME running server. The response code,
+timing, timestamp and source are recorded and added to the current incident's
+evidence. It is a real observation of a controlled lab service, **not customer
+monitoring**, not Grafana, and not a production outage. No external URLs, SSH,
+wallets or infrastructure secrets are accepted.
+
+Observations are in-process only (lost when Render restarts); durability is
+a separate pending milestone. A model may cite the recorded probe but may
+never certify recovery.
+
 ## What is real here?
 
 - Real server-side OpenServ Chat Completions API support.
@@ -82,6 +95,7 @@ This temporary private research branch is not the final hackathon submission. We
 ## Progress
 
 - M0: isolated temporary branch and scope — complete.
-- M1: controlled synthetic incident desk + SERV connector + tests — implementation committed, live platform deployment to be verified.
+- M1: controlled synthetic incident desk + SERV connector + tests — deployed and tested.
+- M1.1: fixed read-only HTTP probe on hosted lab and recorded response — added, deploy verification pending.
 - M2: actual Akmatori Gateway/Grafana integration and durable incident record — pending.
 - M3: Prompt Guard, Shadow Agent, benchmarks, final demo and public submission — pending.
