@@ -1,148 +1,87 @@
-# Agent Preflight
+# SERV Incident Lab
 
-> Agent Preflight catches broken agent handoffs before the workflow runs.
+**A read-only incident investigation desk where AI hypotheses remain separate from source evidence and verified service recovery.**
 
-A workflow can have valid nodes and connections while still being logically broken. Agent Preflight checks a local OpenServ `WorkflowConfig` deterministically, then uses SERV Reasoning to catch semantic handoff failures before execution and return evidence with human-controlled repair suggestions. It never connects to or mutates a live OpenServ workflow.
+## How to test — start here
 
-**Live demo:** https://agent-preflight-m73t.onrender.com
+1. Open the deployment URL and select one of the two incident scenarios.
+2. Check the source evidence cards and their IDs.
+3. Observe that the initial report is explicitly labeled a prewritten synthetic demonstration: it DOES NOT call SERV.
+4. The recovery status must say not verified, even when the model's hypothesis is persuasive.
+5. To demonstrate a REAL SERV inference, the operator must configure SERV_API_KEY and STAGING_ACCESS_TOKEN as secret Render environment variables.
+6. Enter only the staging access token (NOT your SERV API key) in the browser. Click Run SERV investigation.
+7. Inspect the returned model, completion IDs, diagnostic gateway_call selection, source count, and evidence-linked report.
+8. Invalid credentials, an unavailable SERV API, a fabricated evidence ID, or a tool outside the allowlist must fail visibly.
 
-**Demo video:** https://youtu.be/NnW8UtS13p8
+**No user account, wallet, faucet, or customer infrastructure is needed for the controlled lab demo.**
 
-**Hackathon submission post:** https://x.com/IamAlikeX/status/2104152719749710329?s=20
+## Honest project status
 
-## Why SERV Reasoning is essential
+This is an original companion proof-of-concept inspired by the existing Akmatori incident workflow. It is NOT an Akmatori fork, and does not currently call Akmatori's actual MCP Gateway, Grafana, Prometheus, or Loki. Everything in the incident queue is synthetic and labeled as such.
 
-A normal graph validator can prove that two nodes exist and an edge connects them. It cannot reliably determine whether a research brief satisfies a contract-execution task, whether required semantic prerequisites exist, whether explicitly declared permissions are justified by task intent, or whether important responsibilities contradict each other or have no owner.
+The fully integrated Akmatori/SERV incident workflow and independently observed recovery remain separate unfinished milestones. We will not claim them prematurely.
 
-SERV performs that central judgment from a bounded projection. Deterministic code remains the safety layer: it rejects unsafe input, resolves the graph, owns exact structural codes, validates SERV's schema and evidence references, and computes the final combined status. A full preflight is never represented as complete when SERV fails.
+## What is real here?
 
-## Architecture
+- Real server-side OpenServ Chat Completions API support.
+- Automatic tool selection using the same generic gateway_call shape used by Akmatori.
+- A real application-side tool execution loop, but the tool implementations search synthetic local lab data.
+- A second SERV request uses the actual returned local tool results.
+- Deterministic schema and evidence-ID validation.
+- Explicit refusal to accept an AI declaration of service recovery.
+- Read-only allowlist that excludes SSH, Kubernetes, shell commands, transfers, and remediation.
+- Browser dashboard with incident selection, evidence detail, model report, and trace.
+- Automated tests and a Render-compatible Node server.
 
-```mermaid
-flowchart TD
-  A[Local Workflow JSON] --> B[Schema, secret, size and complexity gate]
-  B --> C[Deterministic structural checks]
-  C --> D[Bounded semantic projection]
-  D --> E[SERV Reasoning API]
-  E --> F[Strict schema and evidence validation]
-  F --> G[Combined Preflight Report]
-  G --> H[Human-reviewed local repair]
-  H --> I[Rescan]
-```
+Prompt Guard, Shadow Agent, persistent incident storage, production alert ingestion, and real metrics/log connectors have NOT yet been implemented.
 
-The semantic path uses `POST https://inference-api.openserv.ai/v1/chat/completions` through the OpenAI-compatible SDK. The default model is `gpt-5.4-mini`, reasoning effort is `low`, `temperature` is absent, timeout is 30 seconds, and SDK retries are disabled.
+## Local use (Node 22 or newer)
 
-## Quick start
+Run these commands in the project folder:
 
-Requirements: Linux, Node.js 22.12 or newer, and npm 11 or newer.
+    npm run check
+    npm test
+    npm start
 
-```bash
-npm ci
-cp .env.example .env
-# Set SERV_API_KEY in .env without committing it.
-npm run dev
-```
+Then visit http://localhost:3000.
 
-Open `http://127.0.0.1:8787`. Upload a JSON file or use one of the clearly labeled synthetic demo fixtures.
-
-For a production-style local run:
-
-```bash
-npm run build
-npm start
-```
-
-Production mode requires all usage-protection variables shown in `.env.example`; startup fails closed when they are missing or invalid.
+No third-party npm runtime dependencies, Docker daemon, database, payments, or wallet are necessary for this lab slice.
 
 ## Render deployment
 
-Deploy this repository as one Render **Node Web Service**. The committed `render.yaml` fixes the service to one instance, configures `/health` as the health check, and leaves every runtime value for configuration in Render. Use these commands if configuring the service manually:
+- Runtime: Node
+- Free plan is sufficient for the controlled lab
+- Build: npm run check && npm test
+- Start: npm start
+- Health endpoint: /healthz
 
-```text
-Build command: npm ci && npm run build
-Start command: npm start
-```
+Server-only secrets:
 
-Configure all of the following in the Render environment:
+- SERV_API_KEY: your real SERV Reasoning API key (do not put it in Git, HTML, JavaScript, or chat).
+- STAGING_ACCESS_TOKEN: a separate long random access token the operator controls.
+- SERV_MODEL (optional): gpt-5.4-mini.
 
-```text
-SERV_API_KEY
-SERV_MODEL
-SERV_RATE_LIMIT_WINDOW_SECONDS
-SERV_SESSION_REQUEST_LIMIT
-SERV_IP_REQUEST_LIMIT
-SERV_GLOBAL_REQUEST_CAP
-SERV_GLOBAL_SPEND_CAP_USD
-SERV_ESTIMATED_MAX_COST_PER_REQUEST_USD
-```
+Without BOTH secrets, live inference remains disabled. The public view-only demo still works, so nobody can spend your credits anonymously.
 
-Use `gpt-5.4-mini` for `SERV_MODEL`. Render supplies `PORT`; do not set a provider-specific port in source. `GET /health` returns only `{ "status": "ok" }` and never invokes SERV.
+Live calls are limited to four authorized requests per ten minutes per server-process IP; this is a staging safeguard, not production multi-tenant abuse protection. The application does not store tokens in the browser or return them from APIs.
 
-The request and spending counters are deliberately held in process memory for this hackathon release. The deployment **must remain at exactly one application instance** so the per-session, per-IP, global request, and global spending limits share one counter state. Do not enable horizontal scaling without first replacing the counters with an atomic shared store; distributed infrastructure is intentionally outside this release.
+## Engineering boundaries
 
-## Environment variables
+Every record includes a synthetic source label. We only accept one tool call per live request: runbooks.search or evidence.search against known lab records. A model response is rejected if it references nonexistent evidence or claims independently verified recovery. A zero-execution model response is treated as failure, not substituted with a demo completion.
 
-| Variable                                  | Purpose                                                    |
-| ----------------------------------------- | ---------------------------------------------------------- |
-| `SERV_API_KEY`                            | Server-only SERV credential; never exposed to browser code |
-| `SERV_MODEL`                              | Server-controlled model; defaults to `gpt-5.4-mini`        |
-| `SERV_RATE_LIMIT_WINDOW_SECONDS`          | Session/IP window                                          |
-| `SERV_SESSION_REQUEST_LIMIT`              | Requests per anonymous session per window                  |
-| `SERV_IP_REQUEST_LIMIT`                   | Requests per source IP per window                          |
-| `SERV_GLOBAL_REQUEST_CAP`                 | Conservative daily request cap                             |
-| `SERV_GLOBAL_SPEND_CAP_USD`               | Conservative daily reservation cap                         |
-| `SERV_ESTIMATED_MAX_COST_PER_REQUEST_USD` | Spend reserved before each request                         |
-| `PORT`                                    | Local server port, default `8787`                          |
+There is no untrusted customer data ingestion, access to production environments, automatic remediation, or status certification.
 
-Never prefix the key or model with `VITE_`; Vite-prefixed variables are browser-visible.
+## Source / attribution
 
-## Demo in about 30 seconds
+The original open-source incident platform is [Akmatori](https://github.com/akmatori/akmatori), Apache-2.0. No Akmatori application code is copied into this staging demo.
 
-1. Choose **Try broken workflow**.
-2. Observe that deterministic structural checks pass.
-3. Select **Run SERV Preflight**.
-4. Open the SERV evidence showing the research output cannot satisfy the contract-execution input.
-5. Review the proposed local repair; it is visibly marked **Not applied**.
-6. Choose **View corrected workflow**, run SERV again, and receive `READY FOR REVIEW` only if the required semantic review succeeds.
+SERV API: https://docs.openserv.ai/serv-reasoning/api/chat-completions
 
-The intended story is simple: the graph is valid, SERV sees that the workflow meaning is not, and the developer corrects only a local copy before execution.
+This temporary private research branch is not the final hackathon submission. We need a dedicated public repo, a meaningful full integration, source-of-truth monitoring proof, and the organizer's eligibility/entry confirmation before claiming that status.
 
-## Quality commands
+## Progress
 
-```bash
-npm run format:check
-npm run typecheck
-npm test
-npm run lint
-npm run build
-git diff --check
-```
-
-Automated tests mock the SERV transport and make no live requests. The implementation has also been manually verified once against the real SERV endpoint using the synthetic semantic-mismatch fixture.
-
-## Supported input
-
-The accepted native subset covers workflow `name`, `goal`, `agentIds`, `triggers`, `tasks`, and `edges`; task identity, assignment, descriptions, body, input expectations, dependencies, and output options; and manual, webhook, cron, and x402 trigger configuration. Unknown fields are rejected.
-
-When `edges` is omitted, every trigger connects to the first task and tasks connect sequentially. An explicit `edges: []` remains empty. Dependencies are evidence and never create edges.
-
-See [Architecture](docs/ARCHITECTURE.md), [Safety](docs/SAFETY.md), [Implementation contract](docs/IMPLEMENTATION_SPEC.md), and [Synthetic fixtures](fixtures/README.md).
-
-## Privacy and safety
-
-- Raw uploads remain in request memory and are not persisted.
-- Secret-like input is rejected before any SERV request.
-- Only bounded semantic evidence crosses the SERV boundary.
-- One scan creates at most one SERV request; no automatic retry exists.
-- Invalid or unavailable SERV output produces `SERV REVIEW INCOMPLETE`, never a pass.
-- Reports omit raw uploads, prompts, responses, and credentials.
-- Corrections affect only an in-memory working copy and always require human review.
-- No OpenServ API, workflow execution, deployment, wallet, or mutation path exists.
-
-## Honest limitations
-
-- Agent Preflight reviews local configuration, not runtime behavior.
-- Native `WorkflowConfig` does not expose a complete capability or permission inventory; SERV uses only explicit declarations in supplied task evidence and otherwise returns `insufficient_evidence`.
-- A clean result means `READY FOR REVIEW`, not “safe to execute.”
-- Public builder demand and the absence of a private OpenServ equivalent remain research risks.
-- The included usage guard is intentionally single-instance. The hackathon deployment must use exactly one application instance; multi-instance hosting would require a shared atomic counter store.
+- M0: isolated temporary branch and scope — complete.
+- M1: controlled synthetic incident desk + SERV connector + tests — implementation committed, live platform deployment to be verified.
+- M2: actual Akmatori Gateway/Grafana integration and durable incident record — pending.
+- M3: Prompt Guard, Shadow Agent, benchmarks, final demo and public submission — pending.

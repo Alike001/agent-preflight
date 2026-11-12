@@ -1,0 +1,20 @@
+name: SERV Incident Lab CI
+on:
+  push:
+    branches:
+      - serv-incident-lab-staging
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate JavaScript syntax
+        run: npm run check
+      - name: Test contracts and security boundaries
+        run: npm test
+      - name: Verify dependency-free runtime
+        run: node -e "const p=require('./package.json'); if (p.dependencies || p.devDependencies) process.exit(1)"

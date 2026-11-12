@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0a101a">
+  <meta name="description" content="Evidence-first SERV incident investigation lab">
+  <title>SERV Incident Lab | Evidence-first operations</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script defer src="/app.js"></script>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand"><div class="symbol">S</div><div><strong>SERV Incident Lab</strong><small>Evidence-first operations</small></div></div>
+    <div class="sidelabel">WORKSPACE</div>
+    <div class="nav active"><span>◈</span> Incident desk <span class="number">02</span></div>
+    <div class="nav"><span>◎</span> Investigation traces</div>
+    <div class="nav"><span>▤</span> Evidence sources</div>
+    <div class="hint"><span class="lamp"></span><div><strong>Controlled environment</strong><p>Synthetic fixtures only. No production infrastructure or automatic remediation.</p></div></div>
+    <div class="profile"><span class="avatar">S</span><div><b>Staging workspace</b><small>Operator-controlled SERV access</small></div></div>
+  </aside>
+  <main class="main">
+    <header class="header">
+      <div><div class="breadcrumb">OPERATIONS / INCIDENTS</div><h1>Incident investigation</h1><p>From an alert to a checkable explanation, without guessing.</p></div>
+      <div class="headerchips"><span class="chip"><span class="dot green"></span> Lab operational</span><span class="chip">OpenServ · Open Track</span></div>
+    </header>
+    <section class="caution"><span class="info">ⓘ</span><div><b>Research-grade staging, not production monitoring.</b> All current signals are synthetic. A real SERV completion requires server-side credentials. Akmatori MCP Gateway and Grafana are <b>not yet connected</b>.</div></section>
+    <section class="summary">
+      <div class="metric"><label>LAB INCIDENTS</label><div class="big">02</div><small>Repeatable scenarios</small></div>
+      <div class="metric"><label>REAL DATA SOURCES</label><div class="big">00</div><small>Read-only fixtures</small></div>
+      <div class="metric"><label>SERV API</label><div id="serv-ready" class="big med">Checking</div><small>Staging access required</small></div>
+      <div class="metric"><label>RECOVERY STATUS</label><div class="big med amber">Not verified</div><small>AI cannot declare recovery</small></div>
+    </section>
+    <div class="workspace">
+      <section class="box queue">
+        <div class="boxhead"><div><h2>Incident queue</h2><p>Controlled source evidence</p></div><span class="subchip">2 cases</span></div>
+        <div id="queue"></div>
+        <div class="asideinfo"><strong>Why an incident queue?</strong><p>Choose one reproducible fault and inspect the evidence before running any AI reasoning. The original Akmatori workflow is the architectural reference.</p></div>
+      </section>
+      <section class="box details">
+        <div class="boxhead"><div><div class="breadcrumb">SELECTED INCIDENT</div><h2 id="title">Loading…</h2></div><span class="tag amber">Investigating</span></div>
+        <p id="description" class="description"></p>
+        <div class="metadata"><span id="case-id"></span><span>•</span><span id="service"></span><span>•</span><span>synthetic lab</span></div>
+        <div class="blocktitle"><h3>Evidence collected</h3><small>Immutable, labeled source observations</small></div>
+        <div id="evidence"></div>
+        <div class="blocktitle"><h3>Investigation report</h3><small id="mode">Prewritten demonstration</small></div>
+        <div class="report">
+          <div class="reportbar"><span class="dot yellow"></span><strong>Root-cause hypothesis</strong><span class="tag warn">NOT CONFIRMED</span></div>
+          <p id="summary"></p>
+          <div class="split"><div><label>HYPOTHESIS</label><p id="hypothesis"></p></div><div><label>NEXT READ-ONLY CHECK</label><p id="next"></p></div></div>
+          <div class="evidencefoot"><span>Source references</span><div id="citations"></div></div>
+        </div>
+        <div class="actionrow"><div><label for="staging-token">Staging access token</label><input id="staging-token" type="password" autocomplete="off" placeholder="Required for real SERV calls"></div><button type="button" id="run">Run SERV investigation</button></div>
+        <p class="fineprint">Live inference consumes SERV credits only when you authorize it using the separate staging token. The SERV API key remains on the server.</p>
+        <p id="feedback" role="status" aria-live="polite"></p>
+        <div class="blocktitle"><h3>Investigation provenance</h3><small id="trace-mode">DEMO · NO SERV REQUEST</small></div>
+        <pre id="trace"></pre>
+      </section>
+    </div>
+    <footer>Akmatori-inspired workflow research · <a href="https://github.com/akmatori/akmatori" target="_blank" rel="noreferrer noopener">Original Akmatori</a> · No production data accessed</footer>
+  </main>
+</div>
+</body>
+</html>
