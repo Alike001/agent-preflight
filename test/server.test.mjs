@@ -52,3 +52,25 @@ test("public file handler never exposes server code",async()=>{
     assert.equal(denied.status,404);
   });
 });
+
+test("controlled self-probe records an ACTUAL HTTP failure and retains source labels",async()=>{
+  await withApp({},async(url)=>{
+    const first=await fetch(url+"/api/probe?id=LAB-502-001");
+    assert.equal(first.status,200);
+    const result=await first.json();
+    assert.equal(result.mode,"observed-real-http-controlled-lab");
+    assert.equal(result.observation.details.status,502);
+    assert.equal(result.observation.details.expected_fault_observed,true);
+    assert.equal(result.observation.production_monitoring,false);
+    const record=await (await fetch(url+"/api/demo?id=LAB-502-001")).json();
+    assert.ok(record.incident.evidence.some((item)=>item.id==="ev-actual-http-probe"));
+    assert.equal(record.trace.controlled_http_probe_recorded,true);
+    assert.equal(record.report.recovery_status,"not_verified");
+  });
+});
+test("public cannot make network requests to arbitrary external probe URLs",async()=>{
+  await withApp({},async(url)=>{
+    const response=await fetch(url+"/api/probe?id=http%3A%2F%2F169.254.169.254%2F");
+    assert.equal(response.status,404);
+  });
+});
