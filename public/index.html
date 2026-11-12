@@ -25,7 +25,7 @@
       <div><div class="breadcrumb">OPERATIONS / INCIDENTS</div><h1>Incident investigation</h1><p>From an alert to a checkable explanation, without guessing.</p></div>
       <div class="headerchips"><span class="chip"><span class="dot green"></span> Lab operational</span><span class="chip">OpenServ · Open Track</span></div>
     </header>
-    <section class="caution"><span class="info">ⓘ</span><div><b>Research-grade staging, not production monitoring.</b> All current signals are synthetic. A real SERV completion requires server-side credentials. Akmatori MCP Gateway and Grafana are <b>not yet connected</b>.</div></section>
+    <section class="caution"><span class="info">ⓘ</span><div><b>Research-grade staging, not production monitoring.</b> All current signals are synthetic. A real SERV completion requires server-side credentials. The optional HTTP probe calls this controlled lab server, not a customer system. Akmatori MCP Gateway and Grafana are <b>not yet connected</b>.</div></section>
     <section class="summary">
       <div class="metric"><label>LAB INCIDENTS</label><div class="big">02</div><small>Repeatable scenarios</small></div>
       <div class="metric"><label>REAL DATA SOURCES</label><div class="big">00</div><small>Read-only fixtures</small></div>
@@ -42,7 +42,7 @@
         <div class="boxhead"><div><div class="breadcrumb">SELECTED INCIDENT</div><h2 id="title">Loading…</h2></div><span class="tag amber">Investigating</span></div>
         <p id="description" class="description"></p>
         <div class="metadata"><span id="case-id"></span><span>•</span><span id="service"></span><span>•</span><span>synthetic lab</span></div>
-        <div class="blocktitle"><h3>Evidence collected</h3><small>Immutable, labeled source observations</small></div>
+        <div class="blocktitle"><h3>Evidence collected</h3><div class="evidence-actions"><small>Fixture records + optional real HTTP check</small><button type="button" id="run-probe" class="probe-button">Run lab HTTP probe</button></div></div>
         <div id="evidence"></div>
         <div class="blocktitle"><h3>Investigation report</h3><small id="mode">Prewritten demonstration</small></div>
         <div class="report">
