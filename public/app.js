@@ -64,6 +64,18 @@
       drawReport(data.report,data.mode,data.trace);
     }catch(error){notice(error.message,true);}
   }
+  async function runProbe(){
+    const button=get("run-probe");
+    button.disabled=true;button.textContent="Probing…";
+    notice("Making a real HTTP request against our deliberately faulty lab service.");
+    try{
+      const result=await api("/api/probe?id="+encodeURIComponent(current));
+      await load(current);
+      notice("Observed HTTP "+result.observation.details.status+
+        " from the controlled local lab. This does NOT mean a production service failed.");
+    }catch(error){notice("Probe failed: "+error.message,true);}
+    finally{button.disabled=false;button.textContent="Run lab HTTP probe";}
+  }
   async function run(){
     const button=get("run"),token=get("staging-token").value;
     if(!token)return notice("Enter the staging token to authorize one real SERV investigation.",true);
@@ -82,6 +94,7 @@
   }
   async function init(){
     get("run").addEventListener("click",run);
+    get("run-probe").addEventListener("click",runProbe);
     try{
       const [health,list]=await Promise.all([api("/healthz"),api("/api/incidents")]);
       get("serv-ready").textContent=health.live_configured?"Ready · gated":"Not configured";
